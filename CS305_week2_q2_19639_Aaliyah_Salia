@@ -1,0 +1,65 @@
+Write the program in any computer language to convert the floating decimal number
+to 14-bits binary floating-point model as the real digital values in the hardware
+memory. The example -26.62510 will be saved in the 14-bits hardware memory shown
+as follows.
+26.62510 = 11010.1012 = 0.11010101 ⨯25
+def floating_model(floating_dec):
+"""
+floating_model(-26.625)
+1_10101_11010101
+"""
+1 1 0 1 0 1 1 1 0 1 0 1 0 1
+1: negative
+0: positive
+510 (power of 2) +1610
+= 2110 = 101012
+11010101 as significand
+1 bit 5 bits 8 bits
+Total: 14 bits
+
+
+####################################
+
+def floating_model(floating_dec):
+    # Handle the sign
+    sign_bit = '1' if floating_dec < 0 else '0'
+    floating_dec = abs(floating_dec)
+
+    # Convert the integer part to binary
+    int_part = int(floating_dec)
+    int_binary = bin(int_part).split('b')[1]
+
+    # Convert the fractional part to binary
+    frac_part = floating_dec - int_part
+    frac_binary = []
+    while frac_part > 0 and len(frac_binary) < 8:
+        frac_part *= 2
+        if frac_part >= 1:
+            frac_binary.append('1')
+            frac_part -= 1
+        else:
+            frac_binary.append('0')
+    frac_binary = ''.join(frac_binary)
+
+    # Normalize
+    if int_part != 0:
+        exponent = len(int_binary) - 1
+        mantissa = int_binary[1:] + frac_binary
+    else:
+        mantissa = int_binary + frac_binary
+        exponent = mantissa.index('1') + 1
+        mantissa = mantissa[exponent+1:]
+
+    # Adjust for 5-bit exponent with bias
+    exponent += 16
+    exponent_binary = bin(exponent).split('b')[1].zfill(5)
+
+    # Adjust for 8-bit mantissa
+    mantissa = mantissa.ljust(8, '0')[:8]
+
+    return sign_bit + "_" + exponent_binary + "_" + mantissa
+
+# Test
+print(floating_model(-26.625))  
+
+
